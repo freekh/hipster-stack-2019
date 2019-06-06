@@ -17,6 +17,8 @@ let
 in stdenv.mkDerivation {
   
   name = "hipster-stack";
+  
+  RUSTUP_TOOLCHAIN = "1.35.0";
 
   buildInputs = [
       pp2n
