@@ -1,78 +1,56 @@
-use actix_web::{web, http::header, App, middleware::cors::Cors, HttpRequest, HttpResponse, HttpServer};
-use web::{Json, post, resource};
+use serde::{Deserialize, Serialize};
+use actix_web::{web, App, Responder, HttpServer};
+use web::{Json, post};
 
-type State = Vec<Vec<bool>>;
+ #[derive(Deserialize, Serialize, Clone)]
+enum Direction {
+  North, West, South, East,
+}
 
-const NEIGHBOURS: [(i64, i64); 8] = [
-  ( 1, 1),  ( 1, 0),  ( 1, -1),
-  ( 0, 1)/*,( 0, 0)*/,( 0, -1), // skip self
-  (-1, 1),  (-1, 0),  (-1, -1)
-];
+ #[derive(Deserialize, Serialize, Clone)]
+struct Pos {
+  x: usize,
+  y: usize,
+}
 
-fn count_neighbours(state: &State, x: i64, y: i64) -> usize {
-  NEIGHBOURS.iter().fold(0, |sum, &(nx, ny)| {
-    let x_bound = nx + x;
-    let y_bound = ny + y;
-    if x_bound >= 0 && y_bound >= 0 {
-      let &alive = state
-        .get(x_bound as usize)
-        .and_then(|row| { row.get(y_bound as usize) })
-        .unwrap_or(&false);
-      if alive {
-        sum + 1
-      } else {
-        sum
-      }
-    } else {
-      sum
+#[derive(Deserialize, Serialize, Clone)]
+struct State {
+  pos: Pos,
+  dir: Direction,
+  matrix: Vec<Vec<bool>>,
+}
+
+fn next(json: Json<State>) -> impl Responder {
+  let Json(state) = json;
+  let pos = state.pos;
+  let cell = state.matrix[pos.y][pos.x];
+  let (next_pos, next_dir) = match (state.dir, cell) {
+    // white
+    (Direction::North, false) => (Pos { x: pos.x + 1, ..pos }, Direction::East),
+    (Direction::East, false) => (Pos { y: pos.y + 1, ..pos }, Direction::South),
+    (Direction::South, false) => (Pos { x: pos.x - 1, ..pos }, Direction::West),
+    (Direction::West, false) => (Pos { y: pos.y - 1, ..pos }, Direction::North),
+    // black
+    (Direction::North, true) => (Pos { x: pos.x - 1, ..pos }, Direction::West),
+    (Direction::East, true) => (Pos { y: pos.y - 1, ..pos }, Direction::North),
+    (Direction::South, true) => (Pos { x: pos.x + 1, ..pos }, Direction::East),
+    (Direction::West, true) => (Pos { y: pos.y + 1, ..pos }, Direction::South),
+  };
+  Json(State {
+    pos: next_pos,
+    dir: next_dir,
+    matrix: {
+      let m = &mut state.matrix.clone();
+      let cell = &mut m[pos.y][pos.x];
+      *cell = !*cell;
+      m.clone()
     }
   })
 }
 
-fn next(state: State) -> State {
-  state.iter().enumerate().map(|(x, row)| {
-    row.iter().enumerate().map(|(y, &alive)| {
-      let live_neighbours = count_neighbours(&state, x as i64, y as i64);
-      if alive && live_neighbours < 2 {
-        false
-      } else if alive && (live_neighbours == 2 || live_neighbours == 3) {
-        true
-      } else if alive && live_neighbours > 3 {
-        false
-      } else if !alive && live_neighbours == 3 {
-        true
-      } else {
-        alive
-      }
-    }).collect()
-  }).collect()
-}
-
-fn api(_req: HttpRequest, data: Json<State>) -> HttpResponse {
-    HttpResponse::Ok().json(next(data.into_inner()))
-}
-
-fn index_html(_req: HttpRequest) -> HttpResponse {
-    HttpResponse::Ok().content_type("text/html").body(include_str!("../../frontend/build/index.html"))
-}
-fn index_js(_req: HttpRequest) -> HttpResponse {
-    HttpResponse::Ok().content_type("text/javascript").body(include_str!("../../frontend/build/index.js"))
-}
-
 fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
-        App::new()
-            .wrap(
-                 Cors::new()
-                    .allowed_origin("http://localhost:8080")
-                    .allowed_methods(vec!["GET", "POST"])
-                    .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
-                    .allowed_header(header::CONTENT_TYPE)
-            )           
-            .service(resource("/").to(index_html))
-            .service(resource("/index.js").to(index_js))
-            .service(resource("/api").route(post().to(api)))
-    })
-    .bind("127.0.0.1:8080")?
-    .run()
+  HttpServer::new(|| App::new().service(
+    web::resource("/next").route(post().to(next)))
+  ).bind("127.0.0.1:8080")?
+  .run()
 }

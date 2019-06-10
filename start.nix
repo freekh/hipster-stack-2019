@@ -15,10 +15,7 @@ in stdenv.mkDerivation {
   RUSTUP_TOOLCHAIN = "1.35.0";
 
   buildInputs = [
-    rustup
-    spago
-    purescript
-    nodePackages.http-server
+
   ];
 
 }

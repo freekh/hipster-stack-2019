@@ -1,0 +1,27 @@
+{
+	"Init": {
+    "prefix": "init",
+    "body": [
+      "{",
+      "  \"pos\": {",
+      "    \"x\": 6,",
+      "    \"y\": 6",
+      "  },",
+      "  \"dir\": \"West\",",
+      "  \"matrix\": [",
+      "    [false, false, false, false, false, false, false, false, false, false, false],",
+      "    [false, false, false, false, false, false, false, false, false, false, false],",
+      "    [false, false, false, false, false, false, false, false, false, false, false],",
+      "    [false, false, false, false, false, false, false, false, false, false, false],",
+      "    [false, false, false, false, false, false, false, false, false, false, false],",
+      "    [false, false, false, false, false, false, false, false, false, false, false],",
+      "    [false, false, false, false, false, false, false, false, false, false, false],",
+      "    [false, false, false, false, false, false, false, false, false, false, false],",
+      "    [false, false, false, false, false, false, false, false, false, false, false],",
+      "    [false, false, false, false, false, false, false, false, false, false, false],",
+      "    [false, false, false, false, false, false, false, false, false, false, false]",
+      "  ]",
+      "}",
+    ]
+  }
+}

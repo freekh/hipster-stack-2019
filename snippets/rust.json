@@ -1,0 +1,63 @@
+{
+  "Ownership": {
+    "prefix": "take",
+    "body": "fn take(a: $0Vec<bool>) {}"
+  },
+  "Ant rules": {
+    "prefix": "rules",
+    "body": [
+      "// white",
+      "(Direction::North, false) => (Pos { x: pos.x + 1, ..pos }, Direction::East),",
+      "(Direction::East, false) => (Pos { y: pos.y + 1, ..pos }, Direction::South),",
+      "(Direction::South, false) => (Pos { x: pos.x - 1, ..pos }, Direction::West),",
+      "(Direction::West, false) => (Pos { y: pos.y - 1, ..pos }, Direction::North),",
+      "// black",
+      "(Direction::North, true) => (Pos { x: pos.x - 1, ..pos }, Direction::West),",
+      "(Direction::East, true) => (Pos { y: pos.y - 1, ..pos }, Direction::North),",
+      "(Direction::South, true) => (Pos { x: pos.x + 1, ..pos }, Direction::East),",
+      "(Direction::West, true) => (Pos { y: pos.y + 1, ..pos }, Direction::South),",
+    ]
+  },
+  "Imports": {
+    "prefix": "use",
+    "body": [
+      "use serde::{Deserialize, Serialize};",
+      "use actix_web::{web, App, Responder, HttpServer};",
+      "use web::{Json, post};",
+    ]
+  },
+  "Handler": {
+    "prefix": "handler",
+    "body": [
+      "fn next(json: Json<State>) -> impl Responder",
+    ]
+  },
+  "Actix": {
+    "prefix": "actix",
+    "body": [
+      "HttpServer::new(|| App::new().service(",
+      "  web::resource(\"/next\").route(post().to($1)))",
+      ").bind(\"127.0.0.1:8080\")?",
+      ".run()",
+    ]
+  },
+  "state": {
+    "prefix": "state",
+    "body": [
+      "enum Direction {",
+      "  North, West, South, East,",
+      "}",
+      "",
+      "struct Pos {",
+      "  x: usize,",
+      "  y: usize,",
+      "}",
+      "",
+      "struct State {",
+      "  pos: Pos,",
+      "  dir: Direction,",
+      "  matrix: Vec<Vec<bool>>,",
+      "}",
+    ]
+  },
+}

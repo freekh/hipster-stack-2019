@@ -3,9 +3,17 @@ Welcome to a Spago project!
 You can edit this file as you like.
 -}
 { name =
-    "hipster-stack-2019"
+    "my-project"
 , dependencies =
-    [ "effect", "console", "psci-support", "canvas", "record", "argonaut-codecs", "affjax" ]
+    [ "affjax"
+    , "argonaut-codecs"
+    , "argonaut-generic"
+    , "canvas"
+    , "console"
+    , "effect"
+    , "psci-support"
+    , "record"
+    ]
 , packages =
     ./packages.dhall
 }
