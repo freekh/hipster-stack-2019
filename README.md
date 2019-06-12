@@ -3,7 +3,7 @@ Files for hipster stack 2019 presentation held 2019-06-11.
 # What
 Langton's ant with Nix in Rust and Purescript.
 
-# Starting it up
+# Development
 
 First start up the Rust API server (and watch for changes):
 ```
